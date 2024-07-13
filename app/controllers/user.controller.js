@@ -1,6 +1,7 @@
 const db = require("../models");
 const Users = db.users;
 const Op = db.Sequelize.Op;
+const NotificationService = require('./notificationService');
 
 // Create and Save a new Tutorial
 exports.create = (req, res) => {
@@ -19,17 +20,44 @@ exports.create = (req, res) => {
     date: req.body.date
   };
 
-  // Save Tutorial in the database
-  Users.create(users)
+  //check if email already exists between saved
+  const email = req.body.email;
+  var condition = email ? { email: { [Op.eq]: email } } : null;
+
+  Users.findAll({ where: condition })
     .then(data => {
-      res.send(data);
+      console.log(data.length);
+      // res.send(data);
+
+      if(data.length == 0){
+        // Save Tutorial in the database
+        Users.create(users)
+        .then(data => {
+          res.send(data);
+        })
+        .catch(err => {
+          res.status(500).send({
+            message:
+              err.message || "Some error occurred while creating the Users."
+          });
+        });
+      }else{
+        let error = {
+          "message": "Email Already In Use.",
+          "code": 201,
+        }
+        res.send(error);
+      }
+
     })
     .catch(err => {
       res.status(500).send({
         message:
-          err.message || "Some error occurred while creating the Users."
+          err.message || "Some error occurred while retrieving Users."
       });
     });
+    //end here
+
 };
 
 // Retrieve all Users from the database.
