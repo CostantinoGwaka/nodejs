@@ -1,7 +1,6 @@
 const db = require("../models");
 const Users = db.users;
 const Op = db.Sequelize.Op;
-const NotificationService = require('./notificationService');
 
 // Create and Save a new Tutorial
 exports.create = (req, res) => {
